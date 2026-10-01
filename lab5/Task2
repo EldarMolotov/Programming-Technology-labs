@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Проверка пароля</title>
+</head>
+<body>
+
+<h2>Проверка пароля</h2>
+
+<p>Пароль должен иметь минимум 8 символов и одну цифру.</p>
+
+<input id="password" type="password" placeholder="Введите пароль">
+
+<br><br>
+
+<button id="check">Проверить</button>
+<button id="show">Показать пароль</button>
+
+<p id="result"></p>
+
+<script>
+
+let password = document.getElementById("password");
+let result = document.getElementById("result");
+
+function checkPassword() {
+
+    let text = password.value;
+    let length = false;
+    let number = false;
+
+    if (text.length >= 8) {
+        length = true;
+    }
+
+    for (let i = 0; i < text.length; i++) {
+
+        if (text[i] >= "0" && text[i] <= "9") {
+            number = true;
+        }
+
+    }
+
+    if (length == true && number == true) {
+        result.textContent = "Пароль подходит";
+    }
+    else {
+        result.textContent = "Пароль не подходит";
+    }
+}
+
+document.getElementById("check").addEventListener("click", function() {
+    checkPassword();
+});
+
+password.addEventListener("input", function() {
+    result.textContent = "";
+});
+
+document.getElementById("show").addEventListener("click", function() {
+
+    if (password.type == "password") {
+        password.type = "text";
+    }
+    else {
+        password.type = "password";
+    }
+
+});
+
+</script>
+
+</body>
+</html>
