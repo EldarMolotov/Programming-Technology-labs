@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация</title>
+</head>
+<body>
+
+<h2>Регистрация</h2>
+
+<p>Имя:</p>
+<input id="name" type="text">
+
+<p id="nameError"></p>
+
+<p>Email:</p>
+<input id="email" type="text">
+
+<p id="emailError"></p>
+
+<p>Пароль:</p>
+<input id="password" type="password">
+
+<p id="passwordError"></p>
+
+<button id="register">Зарегистрироваться</button>
+
+<p id="result"></p>
+
+<script>
+
+let name = document.getElementById("name");
+let email = document.getElementById("email");
+let password = document.getElementById("password");
+
+let nameError = document.getElementById("nameError");
+let emailError = document.getElementById("emailError");
+let passwordError = document.getElementById("passwordError");
+
+let result = document.getElementById("result");
+
+function checkForm() {
+
+    let correct = true;
+
+    if (name.value.length < 2) {
+        nameError.textContent = "Введите имя";
+        correct = false;
+    }
+    else {
+        nameError.textContent = "";
+    }
+
+    if (!email.value.includes("@")) {
+        emailError.textContent = "Неправильный email";
+        correct = false;
+    }
+    else {
+        emailError.textContent = "";
+    }
+
+    if (password.value.length < 8) {
+        passwordError.textContent = "Пароль должен быть от 8 символов";
+        correct = false;
+    }
+    else {
+        passwordError.textContent = "";
+    }
+
+    if (correct == true) {
+        result.textContent = "Регистрация успешна";
+    }
+    else {
+        result.textContent = "Исправьте ошибки";
+    }
+}
+
+document.getElementById("register").addEventListener("click", function() {
+    checkForm();
+});
+
+name.addEventListener("input", function() {
+    nameError.textContent = "";
+});
+
+email.addEventListener("input", function() {
+    emailError.textContent = "";
+});
+
+password.addEventListener("input", function() {
+    passwordError.textContent = "";
+});
+
+let fields = [name, email, password];
+
+for (let i = 0; i < fields.length; i++) {
+    console.log(fields[i]);
+}
+
+</script>
+
+</body>
+</html>
