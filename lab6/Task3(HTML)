@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Поймай объект</title>
+
+    <style>
+        #game {
+            width: 500px;
+            height: 300px;
+            border: 2px solid black;
+        }
+
+        #object {
+            width: 40px;
+            height: 40px;
+            background: red;
+            position: absolute;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>Поймай объект</h2>
+
+<p>Попаданий: <span id="score">0</span></p>
+
+<div id="game">
+    <div id="object"></div>
+</div>
+
+<script>
+
+let object = document.getElementById("object");
+let score = document.getElementById("score");
+
+let count = 0;
+
+object.onclick = function() {
+
+    count++;
+
+    score.textContent = count;
+
+    object.style.left = Math.random() * 450 + "px";
+    object.style.top = Math.random() * 250 + "px";
+
+    if (count == 10) {
+        alert("Вы победили!");
+        object.style.display = "none";
+    }
+
+};
+
+</script>
+
+</body>
+</html>
