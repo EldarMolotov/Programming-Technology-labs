@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Список покупок</title>
+</head>
+<body>
+
+<h2>Список покупок</h2>
+
+<input id="input" placeholder="Введите товар">
+<button id="button">Добавить</button>
+
+<ul id="list"></ul>
+
+<script>
+
+let input = document.getElementById("input");
+let button = document.getElementById("button");
+let list = document.getElementById("list");
+
+button.onclick = function() {
+
+    let item = document.createElement("li");
+
+    item.textContent = input.value;
+
+    item.onclick = function() {
+        item.style.textDecoration = "line-through";
+    };
+
+    list.append(item);
+
+    input.value = "";
+};
+
+</script>
+
+</body>
+</html>
