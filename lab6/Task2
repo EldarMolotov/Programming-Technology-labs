@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Калькулятор</title>
+</head>
+<body>
+
+<h2>Калькулятор</h2>
+
+<input id="result" readonly>
+
+<div id="buttons"></div>
+
+<script>
+
+let result = document.getElementById("result");
+let buttons = document.getElementById("buttons");
+
+let arr = ["1", "2", "3", "+", "4", "5", "6", "-", "7", "8", "9", "*", "0", "/", "="];
+
+for (let i = 0; i < arr.length; i++) {
+
+    let button = document.createElement("button");
+
+    button.textContent = arr[i];
+
+    button.onclick = function() {
+
+        if (arr[i] == "=") {
+            result.value = eval(result.value);
+        } else {
+            result.value += arr[i];
+        }
+
+    };
+
+    buttons.append(button);
+}
+
+</script>
+
+</body>
+</html>
