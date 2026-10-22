@@ -1,0 +1,197 @@
+index.html
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список задач</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <h1>Мой список задач</h1>
+
+    <nav>
+        <button data-page="all">Все</button>
+        <button data-page="active">Активные</button>
+        <button data-page="done">Выполненные</button>
+    </nav>
+
+    <form id="taskForm">
+        <input id="taskInput" type="text" placeholder="Новая задача">
+        <button type="submit">Добавить</button>
+    </form>
+
+    <p id="message"></p>
+    <main id="content"></main>
+</body>
+</html>
+
+
+
+
+
+styles.css
+
+
+body {
+    font-family: Arial, sans-serif;
+    background: #edf1f8;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #315b9b;
+}
+
+nav, form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+button, input {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+button {
+    background: #dce6f7;
+    cursor: pointer;
+}
+
+button.active {
+    background: #315b9b;
+    color: white;
+}
+
+.task {
+    background: white;
+    padding: 12px;
+    margin: 10px auto;
+    max-width: 600px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    border-radius: 5px;
+}
+
+.done {
+    text-decoration: line-through;
+    color: gray;
+}
+
+#message {
+    text-align: center;
+    color: red;
+}
+
+@media (max-width: 500px) {
+    body {
+        padding: 10px;
+    }
+
+    form input {
+        width: 100%;
+    }
+}
+
+
+
+
+script.js
+
+
+let tasks = [
+    { title: "Изучить JavaScript", done: false },
+    { title: "Сделать лабораторную", done: true }
+];
+
+let currentPage = "all";
+
+const content = document.querySelector("#content");
+const buttons = document.querySelectorAll("[data-page]");
+const form = document.querySelector("#taskForm");
+const input = document.querySelector("#taskInput");
+const message = document.querySelector("#message");
+
+function showTasks() {
+    content.replaceChildren();
+    message.textContent = "";
+
+    let filtered = tasks;
+
+    if (currentPage === "active") {
+        filtered = tasks.filter(task => !task.done);
+    }
+
+    if (currentPage === "done") {
+        filtered = tasks.filter(task => task.done);
+    }
+
+    if (filtered.length === 0) {
+        content.textContent = "Задач пока нет.";
+    }
+
+    filtered.forEach(task => {
+        const card = document.createElement("div");
+        const name = document.createElement("span");
+        const button = document.createElement("button");
+
+        card.className = "task";
+        name.textContent = task.title;
+
+        if (task.done) {
+            name.classList.add("done");
+        }
+
+        button.textContent = task.done ? "Вернуть" : "Выполнить";
+
+        button.addEventListener("click", function() {
+            task.done = !task.done;
+            showTasks();
+        });
+
+        card.append(name, button);
+        content.append(card);
+    });
+
+    buttons.forEach(button => {
+        button.classList.toggle(
+            "active",
+            button.dataset.page === currentPage
+        );
+    });
+}
+
+buttons.forEach(button => {
+    button.addEventListener("click", function() {
+        currentPage = button.dataset.page;
+        showTasks();
+    });
+});
+
+form.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const title = input.value.trim();
+
+    if (title === "") {
+        message.textContent = "Введите название задачи!";
+        return;
+    }
+
+    tasks.push({ title: title, done: false });
+
+    input.value = "";
+    currentPage = "all";
+    showTasks();
+});
+
+showTasks();
