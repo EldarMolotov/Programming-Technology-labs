@@ -1,0 +1,454 @@
+index.html
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Менеджер проектов и задач</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Менеджер проектов и задач</h1>
+        <p>Лабораторная работа №8 — JSON и LocalStorage</p>
+
+        <section>
+            <h2>Добавить проект</h2>
+            <form id="projectForm">
+                <input id="projectName" type="text"
+                       placeholder="Название проекта" required>
+                <input id="projectDate" type="date">
+                <button type="submit">Добавить проект</button>
+            </form>
+        </section>
+
+        <section>
+            <h2>Поиск проектов и задач</h2>
+            <input id="search" type="text"
+                   placeholder="Введите название для поиска">
+        </section>
+
+        <section>
+            <h2>Список проектов</h2>
+            <div id="projects"></div>
+            <p id="emptyMessage">Проектов пока нет.</p>
+        </section>
+
+        <section>
+            <h2>Работа с данными</h2>
+            <button id="exportBtn">Экспорт JSON</button>
+            <button id="importBtn">Импорт JSON</button>
+            <input id="importFile" type="file"
+                   accept=".json" hidden>
+            <button id="clearBtn" class="danger">Удалить все проекты</button>
+            <p id="message"></p>
+        </section>
+    </div>
+</body>
+</html>
+
+
+
+
+styles.css
+
+
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background: #f1f4f9;
+    color: #222;
+}
+
+.container {
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+h1 {
+    color: #2456a6;
+    text-align: center;
+}
+
+h2 {
+    font-size: 20px;
+}
+
+section {
+    background: white;
+    padding: 20px;
+    margin: 18px 0;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #d8deea;
+}
+
+input, select {
+    box-sizing: border-box;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+}
+
+input[type="text"] {
+    width: 100%;
+}
+
+button {
+    padding: 10px 14px;
+    margin: 5px 3px;
+    border: none;
+    border-radius: 5px;
+    background: #2864c5;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #194b99;
+}
+
+.danger {
+    background: #c0392b;
+}
+
+.danger:hover {
+    background: #922b21;
+}
+
+.project {
+    padding: 15px;
+    margin: 12px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafcff;
+}
+
+.task {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 0;
+    border-top: 1px solid #eee;
+}
+
+.completed {
+    text-decoration: line-through;
+    color: #777;
+}
+
+#message {
+    color: #24743a;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    section {
+        padding: 12px;
+    }
+
+    .task {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+
+
+
+script.js
+
+
+const KEY = "lab8_projects";
+
+const projectForm = document.getElementById("projectForm");
+const projectName = document.getElementById("projectName");
+const projectDate = document.getElementById("projectDate");
+const projectsContainer = document.getElementById("projects");
+const searchInput = document.getElementById("search");
+const emptyMessage = document.getElementById("emptyMessage");
+const message = document.getElementById("message");
+
+let projects = loadProjects();
+
+// Загружаем данные из LocalStorage
+function loadProjects() {
+    try {
+        const data = localStorage.getItem(KEY);
+        const result = data ? JSON.parse(data) : [];
+
+        if (!Array.isArray(result)) {
+            return [];
+        }
+
+        return result.filter(project =>
+            project &&
+            typeof project.id === "string" &&
+            typeof project.name === "string" &&
+            Array.isArray(project.tasks)
+        );
+    } catch (error) {
+        return [];
+    }
+}
+
+// Сохраняем данные в JSON
+function saveProjects() {
+    try {
+        localStorage.setItem(KEY, JSON.stringify(projects));
+        message.textContent = "Данные сохранены.";
+    } catch (error) {
+        message.textContent = "Ошибка сохранения данных.";
+    }
+}
+
+function createId() {
+    return Date.now().toString(36) +
+        Math.random().toString(36).slice(2, 8);
+}
+
+// Добавление проекта
+projectForm.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const name = projectName.value.trim();
+
+    if (!name) {
+        message.textContent = "Введите название проекта.";
+        return;
+    }
+
+    projects.push({
+        id: createId(),
+        name: name,
+        date: projectDate.value,
+        tasks: []
+    });
+
+    projectForm.reset();
+    saveProjects();
+    renderProjects();
+});
+
+// Отображение проектов и задач
+function renderProjects() {
+    projectsContainer.replaceChildren();
+
+    const query = searchInput.value.trim().toLowerCase();
+
+    const filtered = projects.filter(project =>
+        project.name.toLowerCase().includes(query) ||
+        project.tasks.some(task =>
+            task.name.toLowerCase().includes(query)
+        )
+    );
+
+    emptyMessage.hidden = filtered.length > 0;
+    emptyMessage.textContent = projects.length
+        ? "Ничего не найдено."
+        : "Проектов пока нет.";
+
+    filtered.forEach(project => {
+        const card = document.createElement("div");
+        card.className = "project";
+
+        const title = document.createElement("h3");
+        title.textContent = project.name;
+
+        const date = document.createElement("p");
+        date.textContent = project.date
+            ? "Срок: " + project.date
+            : "Срок не указан";
+
+        const deleteProject = document.createElement("button");
+        deleteProject.textContent = "Удалить проект";
+        deleteProject.className = "danger";
+
+        deleteProject.addEventListener("click", function() {
+            projects = projects.filter(item =>
+                item.id !== project.id
+            );
+
+            saveProjects();
+            renderProjects();
+        });
+
+        const taskForm = document.createElement("form");
+        const taskInput = document.createElement("input");
+        taskInput.type = "text";
+        taskInput.placeholder = "Название задачи";
+        taskInput.required = true;
+
+        const addTask = document.createElement("button");
+        addTask.textContent = "Добавить задачу";
+
+        taskForm.append(taskInput, addTask);
+
+        taskForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const name = taskInput.value.trim();
+
+            if (!name) return;
+
+            project.tasks.push({
+                id: createId(),
+                name: name,
+                status: "Не начата"
+            });
+
+            saveProjects();
+            renderProjects();
+        });
+
+        card.append(title, date, deleteProject, taskForm);
+
+        project.tasks
+            .filter(task =>
+                !query ||
+                project.name.toLowerCase().includes(query) ||
+                task.name.toLowerCase().includes(query)
+            )
+            .forEach(task => {
+                const row = document.createElement("div");
+                row.className = "task";
+
+                const taskName = document.createElement("span");
+                taskName.textContent = task.name;
+
+                if (task.status === "Выполнена") {
+                    taskName.className = "completed";
+                }
+
+                const status = document.createElement("select");
+
+                ["Не начата", "В процессе", "Выполнена"]
+                    .forEach(value => {
+                        const option = document.createElement("option");
+                        option.value = value;
+                        option.textContent = value;
+                        option.selected = task.status === value;
+                        status.append(option);
+                    });
+
+                status.addEventListener("change", function() {
+                    task.status = status.value;
+                    saveProjects();
+                    renderProjects();
+                });
+
+                const deleteTask = document.createElement("button");
+                deleteTask.textContent = "Удалить";
+                deleteTask.className = "danger";
+
+                deleteTask.addEventListener("click", function() {
+                    project.tasks = project.tasks.filter(item =>
+                        item.id !== task.id
+                    );
+
+                    saveProjects();
+                    renderProjects();
+                });
+
+                row.append(taskName, status, deleteTask);
+                card.append(row);
+            });
+
+        projectsContainer.append(card);
+    });
+}
+
+// Поиск
+searchInput.addEventListener("input", renderProjects);
+
+// Экспорт данных в JSON-файл
+document.getElementById("exportBtn").addEventListener("click", function() {
+    const blob = new Blob(
+        [JSON.stringify(projects, null, 2)],
+        { type: "application/json" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "projects.json";
+    link.click();
+
+    URL.revokeObjectURL(url);
+});
+
+// Импорт JSON-файла
+document.getElementById("importBtn").addEventListener("click", function() {
+    document.getElementById("importFile").click();
+});
+
+document.getElementById("importFile").addEventListener("change", async function() {
+    const file = this.files[0];
+    if (!file) return;
+
+    try {
+        const imported = JSON.parse(await file.text());
+
+        const valid = Array.isArray(imported) &&
+            imported.every(project =>
+                project &&
+                typeof project.name === "string" &&
+                Array.isArray(project.tasks) &&
+                project.tasks.every(task =>
+                    task &&
+                    typeof task.name === "string" &&
+                    ["Не начата", "В процессе", "Выполнена"]
+                        .includes(task.status)
+                )
+            );
+
+        if (!valid) {
+            throw new Error("Неверный формат");
+        }
+
+        projects = imported.map(project => ({
+            id: typeof project.id === "string"
+                ? project.id : createId(),
+            name: project.name,
+            date: typeof project.date === "string"
+                ? project.date : "",
+            tasks: project.tasks.map(task => ({
+                id: typeof task.id === "string"
+                    ? task.id : createId(),
+                name: task.name,
+                status: task.status
+            }))
+        }));
+
+        saveProjects();
+        renderProjects();
+        message.textContent = "Данные импортированы.";
+    } catch (error) {
+        message.textContent = "Ошибка: неверный JSON-файл.";
+    }
+
+    this.value = "";
+});
+
+// Удаление всех проектов
+document.getElementById("clearBtn").addEventListener("click", function() {
+    if (!confirm("Удалить все проекты?")) return;
+
+    projects = [];
+    localStorage.removeItem(KEY);
+
+    renderProjects();
+    message.textContent = "Все проекты удалены.";
+});
+
+// Первый показ данных
+renderProjects();
