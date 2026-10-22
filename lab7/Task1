@@ -1,0 +1,136 @@
+index.html
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Туристический гид</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <h1>Туристический гид Казахстана</h1>
+
+    <nav>
+        <button data-page="places">Места</button>
+        <button data-page="routes">Маршруты</button>
+        <button data-page="tips">Советы</button>
+    </nav>
+
+    <main id="content"></main>
+</body>
+</html>
+
+
+
+
+styles.css
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #eaf5ee;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #246b45;
+}
+
+nav {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #cde8d5;
+    cursor: pointer;
+}
+
+button.active {
+    background-color: #246b45;
+    color: white;
+}
+
+.card {
+    background: white;
+    padding: 15px;
+    margin: 10px auto;
+    max-width: 600px;
+    border-radius: 8px;
+}
+
+@media (max-width: 500px) {
+    body {
+        padding: 10px;
+    }
+
+    button {
+        padding: 10px;
+    }
+}
+
+
+
+
+script.js
+
+const pages = {
+    places: [
+        { title: "Озеро Каинды", text: "Красивое горное озеро." },
+        { title: "Чарынский каньон", text: "Известный природный парк." },
+        { title: "Кольсайские озера", text: "Красивые озера в горах." }
+    ],
+
+    routes: [
+        { title: "Маршрут 1", text: "Алматы — Чарынский каньон." },
+        { title: "Маршрут 2", text: "Алматы — Кольсайские озера." }
+    ],
+
+    tips: [
+        { title: "Одежда", text: "Возьмите удобную обувь." },
+        { title: "Вода", text: "Не забудьте питьевую воду." },
+        { title: "Чистота", text: "Не оставляйте мусор на природе." }
+    ]
+};
+
+const content = document.querySelector("#content");
+const buttons = document.querySelectorAll("[data-page]");
+
+function showPage(page) {
+    content.replaceChildren();
+
+    pages[page].forEach(item => {
+        const card = document.createElement("div");
+        const title = document.createElement("h2");
+        const text = document.createElement("p");
+
+        card.className = "card";
+        title.textContent = item.title;
+        text.textContent = item.text;
+
+        card.append(title, text);
+        content.append(card);
+    });
+
+    buttons.forEach(button => {
+        button.classList.toggle(
+            "active",
+            button.dataset.page === page
+        );
+    });
+}
+
+buttons.forEach(button => {
+    button.addEventListener("click", function() {
+        showPage(button.dataset.page);
+    });
+});
+
+showPage("places");
