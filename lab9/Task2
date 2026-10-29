@@ -1,0 +1,236 @@
+index.html
+
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пользователи и публикации</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <h1>Пользователи и публикации</h1>
+
+    <button id="load" type="button">Загрузить пользователей</button>
+    <input id="search" placeholder="Поиск по имени">
+
+    <p id="status" role="status">Нажмите кнопку для загрузки.</p>
+    <button id="retry" type="button" hidden>Повторить</button>
+
+    <div id="users"></div>
+</body>
+</html>
+
+
+styles.css
+
+
+
+body {
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    background: #f0f4f8;
+}
+
+h1 {
+    color: #24527a;
+}
+
+input, button {
+    padding: 10px;
+    margin: 5px;
+}
+
+button {
+    background: #2878b5;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.6;
+}
+
+.card {
+    margin: 15px 0;
+    padding: 15px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.post {
+    margin: 10px 0;
+    padding: 10px;
+    background: #eef5fb;
+    border-radius: 5px;
+}
+
+#status {
+    font-weight: bold;
+}
+
+.success {
+    color: green;
+}
+
+.error {
+    color: #c62828;
+}
+
+
+script.js
+
+
+
+const loadButton = document.getElementById("load");
+const retryButton = document.getElementById("retry");
+const search = document.getElementById("search");
+const status = document.getElementById("status");
+const usersBox = document.getElementById("users");
+
+let users = [];
+let lastAction = loadUsers;
+
+function setStatus(text, type) {
+    status.textContent = text;
+    status.className = type;
+}
+
+async function getData(url) {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error("HTTP " + response.status);
+    }
+
+    return await response.json();
+}
+
+function showUsers() {
+    usersBox.replaceChildren();
+
+    const query = search.value.trim().toLowerCase();
+
+    const filtered = users.filter(function(user) {
+        return user.name.toLowerCase().includes(query);
+    });
+
+    filtered.forEach(function(user) {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const title = document.createElement("h2");
+        title.textContent = user.name;
+
+        const email = document.createElement("p");
+        email.textContent = "Email: " + user.email;
+
+        const button = document.createElement("button");
+        button.textContent = "Показать публикации";
+
+        const postsBox = document.createElement("div");
+
+        button.onclick = async function() {
+            button.disabled = true;
+            postsBox.replaceChildren();
+            setStatus("Загрузка публикаций...", "");
+
+            lastAction = async function() {
+                await loadPosts(user, postsBox, button);
+            };
+
+            await lastAction();
+        };
+
+        card.appendChild(title);
+        card.appendChild(email);
+        card.appendChild(button);
+        card.appendChild(postsBox);
+        usersBox.appendChild(card);
+    });
+
+    if (users.length > 0 && filtered.length === 0) {
+        const p = document.createElement("p");
+        p.textContent = "Пользователи не найдены.";
+        usersBox.appendChild(p);
+    }
+}
+
+async function loadPosts(user, postsBox, button) {
+    button.disabled = true;
+    retryButton.hidden = true;
+    postsBox.replaceChildren();
+    setStatus("Загрузка публикаций...", "");
+
+    try {
+        const posts = await getData(
+            "https://jsonplaceholder.typicode.com/posts?userId=" + user.id
+        );
+
+        posts.forEach(function(post) {
+            const item = document.createElement("div");
+            item.className = "post";
+
+            const title = document.createElement("h3");
+            title.textContent = post.title;
+
+            const text = document.createElement("p");
+            text.textContent = post.body;
+
+            item.appendChild(title);
+            item.appendChild(text);
+            postsBox.appendChild(item);
+        });
+
+        button.textContent = "Публикации загружены";
+        setStatus("Успех! Публикаций: " + posts.length, "success");
+    } catch (error) {
+        setStatus("Ошибка: " + error.message, "error");
+        retryButton.hidden = false;
+    } finally {
+        button.disabled = false;
+    }
+}
+
+async function loadUsers() {
+    loadButton.disabled = true;
+    retryButton.hidden = true;
+    setStatus("Загрузка пользователей...", "");
+
+    try {
+        users = await getData(
+            "https://jsonplaceholder.typicode.com/users"
+        );
+
+        if (!Array.isArray(users)) {
+            throw new Error("Неверный формат данных");
+        }
+
+        showUsers();
+        setStatus("Успех! Пользователей: " + users.length, "success");
+    } catch (error) {
+        setStatus("Ошибка: " + error.message, "error");
+        retryButton.hidden = false;
+    } finally {
+        loadButton.disabled = false;
+    }
+}
+
+loadButton.addEventListener("click", function() {
+    lastAction = loadUsers;
+    loadUsers();
+});
+
+retryButton.addEventListener("click", function() {
+    lastAction();
+});
+
+search.addEventListener("input", showUsers);
