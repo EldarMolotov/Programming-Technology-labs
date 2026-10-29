@@ -1,0 +1,296 @@
+index.html
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пользователи, публикации и комментарии</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <h1>Пользователи, публикации и комментарии</h1>
+
+    <button id="loadUsers" type="button">Загрузить пользователей</button>
+
+    <label for="user">Выберите пользователя:</label>
+    <select id="user" disabled>
+        <option value="">Сначала загрузите пользователей</option>
+    </select>
+
+    <p id="status" role="status">Ожидание загрузки.</p>
+    <p id="counter">Успешных загрузок ресурсов: 0</p>
+
+    <button id="retry" type="button" hidden>Повторить</button>
+
+    <h2>Публикации</h2>
+    <div id="posts"></div>
+</body>
+</html>
+
+
+styles.css
+
+
+
+body {
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    background: #f4f0fa;
+}
+
+h1 {
+    color: #65469b;
+}
+
+label {
+    display: block;
+    margin-top: 15px;
+}
+
+select, button {
+    padding: 10px;
+    margin: 5px 0;
+}
+
+button {
+    background: #65469b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.post {
+    margin: 15px 0;
+    padding: 15px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.comment {
+    margin: 8px 0;
+    padding: 10px;
+    background: #eee8f7;
+    border-radius: 5px;
+}
+
+#status {
+    font-weight: bold;
+}
+
+.success {
+    color: green;
+}
+
+.error {
+    color: #c62828;
+}
+
+
+
+script.js
+
+
+
+const loadButton = document.getElementById("loadUsers");
+const userSelect = document.getElementById("user");
+const status = document.getElementById("status");
+const counter = document.getElementById("counter");
+const retryButton = document.getElementById("retry");
+const postsBox = document.getElementById("posts");
+
+let successfulLoads = 0;
+let lastAction = loadUsers;
+
+function setStatus(text, type) {
+    status.textContent = text;
+    status.className = type;
+}
+
+function updateCounter() {
+    counter.textContent =
+        "Успешных загрузок ресурсов: " + successfulLoads;
+}
+
+async function getData(url) {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error("HTTP " + response.status);
+    }
+
+    return await response.json();
+}
+
+// Загружаем пользователей
+async function loadUsers() {
+    loadButton.disabled = true;
+    retryButton.hidden = true;
+    setStatus("Загрузка пользователей...", "");
+
+    try {
+        const users = await getData(
+            "https://jsonplaceholder.typicode.com/users"
+        );
+
+        if (!Array.isArray(users)) {
+            throw new Error("Неверный формат данных");
+        }
+
+        userSelect.replaceChildren();
+
+        const firstOption = document.createElement("option");
+        firstOption.value = "";
+        firstOption.textContent = "Выберите пользователя";
+        userSelect.appendChild(firstOption);
+
+        users.forEach(function(user) {
+            const option = document.createElement("option");
+            option.value = user.id;
+            option.textContent = user.name;
+            userSelect.appendChild(option);
+        });
+
+        userSelect.disabled = false;
+        successfulLoads++;
+        updateCounter();
+
+        setStatus("Успех! Пользователи загружены.", "success");
+    } catch (error) {
+        setStatus("Ошибка: " + error.message, "error");
+        retryButton.hidden = false;
+    } finally {
+        loadButton.disabled = false;
+    }
+}
+
+// Загружаем публикации выбранного пользователя
+async function loadPosts() {
+    const userId = userSelect.value;
+    postsBox.replaceChildren();
+
+    if (userId === "") {
+        return;
+    }
+
+    retryButton.hidden = true;
+    setStatus("Загрузка публикаций...", "");
+
+    lastAction = loadPosts;
+
+    try {
+        const posts = await getData(
+            "https://jsonplaceholder.typicode.com/posts?userId=" + userId
+        );
+
+        posts.forEach(function(post) {
+            const card = document.createElement("div");
+            card.className = "post";
+
+            const title = document.createElement("h3");
+            title.textContent = post.title;
+
+            const text = document.createElement("p");
+            text.textContent = post.body;
+
+            const button = document.createElement("button");
+            button.textContent = "Показать комментарии";
+
+            const commentsBox = document.createElement("div");
+
+            button.onclick = async function() {
+                button.disabled = true;
+                commentsBox.replaceChildren();
+                retryButton.hidden = true;
+                setStatus("Загрузка комментариев...", "");
+
+                lastAction = async function() {
+                    await loadComments(post.id, commentsBox, button);
+                };
+
+                await lastAction();
+            };
+
+            card.appendChild(title);
+            card.appendChild(text);
+            card.appendChild(button);
+            card.appendChild(commentsBox);
+            postsBox.appendChild(card);
+        });
+
+        successfulLoads++;
+        updateCounter();
+        setStatus("Успех! Публикаций: " + posts.length, "success");
+    } catch (error) {
+        setStatus("Ошибка: " + error.message, "error");
+        retryButton.hidden = false;
+    }
+}
+
+// Загружаем комментарии к публикации
+async function loadComments(postId, box, button) {
+    button.disabled = true;
+    retryButton.hidden = true;
+
+    try {
+        const comments = await getData(
+            "https://jsonplaceholder.typicode.com/comments?postId=" + postId
+        );
+
+        box.replaceChildren();
+
+        comments.forEach(function(comment) {
+            const item = document.createElement("div");
+            item.className = "comment";
+
+            const name = document.createElement("strong");
+            name.textContent = comment.name;
+
+            const email = document.createElement("p");
+            email.textContent = "Email: " + comment.email;
+
+            const text = document.createElement("p");
+            text.textContent = comment.body;
+
+            item.appendChild(name);
+            item.appendChild(email);
+            item.appendChild(text);
+            box.appendChild(item);
+        });
+
+        successfulLoads++;
+        updateCounter();
+        button.textContent = "Комментарии загружены";
+
+        setStatus("Успех! Комментариев: " + comments.length, "success");
+    } catch (error) {
+        setStatus("Ошибка: " + error.message, "error");
+        retryButton.hidden = false;
+    } finally {
+        button.disabled = false;
+    }
+}
+
+loadButton.addEventListener("click", function() {
+    lastAction = loadUsers;
+    loadUsers();
+});
+
+userSelect.addEventListener("change", loadPosts);
+
+retryButton.addEventListener("click", function() {
+    lastAction();
+});
+
+updateCounter();
