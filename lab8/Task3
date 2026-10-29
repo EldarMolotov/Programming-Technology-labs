@@ -1,0 +1,185 @@
+index.html
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Бронирование комнат</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <h1>Бронирование учебных комнат</h1>
+
+    <label for="date">Дата:</label>
+    <input id="date" type="date">
+
+    <label for="time">Время:</label>
+    <input id="time" type="time">
+
+    <label for="room">Аудитория:</label>
+    <select id="room">
+        <option value="101">Аудитория 101</option>
+        <option value="102">Аудитория 102</option>
+        <option value="103">Аудитория 103</option>
+    </select>
+
+    <button id="add" type="button">Забронировать</button>
+
+    <p id="message"></p>
+
+    <h2>Мои бронирования</h2>
+    <ul id="list"></ul>
+
+</body>
+</html>
+
+
+
+styles.css
+
+
+body {
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #f4f0fa;
+}
+
+h1 {
+    color: #65469b;
+}
+
+label {
+    display: block;
+    margin-top: 12px;
+}
+
+input, select, button {
+    padding: 10px;
+    margin: 5px 0;
+}
+
+button {
+    cursor: pointer;
+    background: #65469b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+li {
+    margin: 12px 0;
+}
+
+#message {
+    color: #65469b;
+}
+
+
+
+script.js
+
+
+let bookings = [];
+
+try {
+    const saved = localStorage.getItem("bookings");
+
+    if (saved !== null) {
+        const data = JSON.parse(saved);
+
+        if (Array.isArray(data)) {
+            bookings = data.filter(function(item) {
+                return item &&
+                    typeof item.date === "string" &&
+                    typeof item.time === "string" &&
+                    ["101", "102", "103"].includes(item.room);
+            });
+        }
+    }
+} catch (error) {
+    bookings = [];
+}
+
+const date = document.getElementById("date");
+const time = document.getElementById("time");
+const room = document.getElementById("room");
+const add = document.getElementById("add");
+const list = document.getElementById("list");
+const message = document.getElementById("message");
+
+function show() {
+    list.innerHTML = "";
+
+    bookings.forEach(function(booking, index) {
+        const li = document.createElement("li");
+
+        li.textContent =
+            "Аудитория " + booking.room + " — " +
+            booking.date + " — " +
+            booking.time + " ";
+
+        const del = document.createElement("button");
+        del.textContent = "Отменить";
+        del.type = "button";
+
+        del.onclick = function() {
+            bookings.splice(index, 1);
+            save();
+            message.textContent = "Бронирование отменено!";
+        };
+
+        li.appendChild(del);
+        list.appendChild(li);
+    });
+}
+
+function save() {
+    try {
+        localStorage.setItem(
+            "bookings",
+            JSON.stringify(bookings)
+        );
+        show();
+    } catch (error) {
+        alert("Не удалось сохранить бронирование!");
+    }
+}
+
+add.onclick = function() {
+    if (date.value === "" || time.value === "") {
+        alert("Выберите дату и время!");
+        return;
+    }
+
+    const conflict = bookings.some(function(booking) {
+        return booking.date === date.value &&
+            booking.time === time.value &&
+            booking.room === room.value;
+    });
+
+    if (conflict) {
+        message.textContent =
+            "Ошибка! Эта аудитория уже занята в это время.";
+        return;
+    }
+
+    bookings.push({
+        date: date.value,
+        time: time.value,
+        room: room.value
+    });
+
+    save();
+
+    message.textContent = "Комната успешно забронирована!";
+
+    date.value = "";
+    time.value = "";
+};
+
+show();
