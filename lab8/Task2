@@ -1,0 +1,178 @@
+index.html
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Учёт расходов</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <h1>Учёт расходов</h1>
+
+    <input id="category" placeholder="Категория">
+
+    <input id="amount" type="number"
+           min="0.01" step="0.01" placeholder="Сумма">
+
+    <input id="date" type="date">
+
+    <button id="add" type="button">Добавить расход</button>
+
+    <p id="message"></p>
+
+    <h2>Список расходов</h2>
+    <ul id="list"></ul>
+
+    <h2>Общий расход: <span id="total">0</span> тг</h2>
+
+</body>
+</html>
+
+
+
+styles.css
+
+body {
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #f0f7f2;
+}
+
+h1 {
+    color: #287a52;
+}
+
+input, button {
+    padding: 10px;
+    margin: 5px;
+}
+
+button {
+    cursor: pointer;
+    background: #287a52;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+li {
+    margin: 12px 0;
+}
+
+#message {
+    color: green;
+}
+
+
+
+script.js
+
+
+let expenses = [];
+
+try {
+    const saved = localStorage.getItem("expenses");
+
+    if (saved !== null) {
+        const data = JSON.parse(saved);
+
+        if (Array.isArray(data)) {
+            expenses = data.filter(function(item) {
+                return item &&
+                    typeof item.category === "string" &&
+                    typeof item.amount === "number" &&
+                    Number.isFinite(item.amount) &&
+                    item.amount > 0 &&
+                    typeof item.date === "string";
+            });
+        }
+    }
+} catch (error) {
+    expenses = [];
+}
+
+const category = document.getElementById("category");
+const amount = document.getElementById("amount");
+const date = document.getElementById("date");
+const add = document.getElementById("add");
+const list = document.getElementById("list");
+const total = document.getElementById("total");
+const message = document.getElementById("message");
+
+function show() {
+    list.innerHTML = "";
+
+    let sum = 0;
+
+    expenses.forEach(function(expense, index) {
+        const li = document.createElement("li");
+
+        li.textContent =
+            expense.category + " — " +
+            expense.amount.toFixed(2) + " тг — " +
+            expense.date + " ";
+
+        sum += expense.amount;
+
+        const del = document.createElement("button");
+        del.textContent = "Удалить";
+        del.type = "button";
+
+        del.onclick = function() {
+            expenses.splice(index, 1);
+            save();
+            message.textContent = "Расход удалён!";
+        };
+
+        li.appendChild(del);
+        list.appendChild(li);
+    });
+
+    total.textContent = sum.toFixed(2);
+}
+
+function save() {
+    try {
+        localStorage.setItem(
+            "expenses",
+            JSON.stringify(expenses)
+        );
+        show();
+    } catch (error) {
+        alert("Не удалось сохранить расходы!");
+    }
+}
+
+add.onclick = function() {
+    const name = category.value.trim();
+    const money = Number(amount.value);
+    const day = date.value;
+
+    if (name === "" || amount.value === "" ||
+        !Number.isFinite(money) || money <= 0 ||
+        day === "") {
+        alert("Заполните все поля правильно!");
+        return;
+    }
+
+    expenses.push({
+        category: name,
+        amount: money,
+        date: day
+    });
+
+    category.value = "";
+    amount.value = "";
+    date.value = "";
+
+    save();
+    message.textContent = "Расход добавлен!";
+};
+
+show();
+
