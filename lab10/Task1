@@ -1,0 +1,157 @@
+index.html
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор скидки</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Калькулятор скидки</h1>
+        <p>Рассчитайте стоимость товара с учётом скидки.</p>
+
+        <label>Цена товара (₸):</label>
+        <input type="number" id="price" placeholder="Введите цену">
+
+        <label>Скидка (%):</label>
+        <input type="number" id="discount" placeholder="Введите скидку">
+
+        <button id="calculate">Рассчитать</button>
+        <button id="clear" class="clear">Очистить</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
+
+
+
+
+styles.css
+
+
+body {
+    font-family: Arial, sans-serif;
+    background: #eef2f7;
+    margin: 0;
+    padding: 40px 15px;
+}
+
+.container {
+    max-width: 450px;
+    margin: auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px #0002;
+}
+
+h1 {
+    text-align: center;
+    color: #2563eb;
+}
+
+label {
+    display: block;
+    margin-top: 15px;
+}
+
+input {
+    width: 100%;
+    padding: 11px;
+    margin-top: 7px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 18px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.clear {
+    background: #64748b;
+}
+
+#result {
+    margin-top: 20px;
+    line-height: 1.8;
+    font-weight: bold;
+}
+
+
+
+
+script.js
+
+
+
+import {
+    calculateDiscount,
+    calculateFinalPrice
+} from "./script1.js";
+
+const priceInput = document.querySelector("#price");
+const discountInput = document.querySelector("#discount");
+const result = document.querySelector("#result");
+
+document.querySelector("#calculate").addEventListener("click", () => {
+    const price = Number(priceInput.value);
+    const discount = Number(discountInput.value);
+
+    if (
+        priceInput.value.trim() === "" ||
+        discountInput.value.trim() === "" ||
+        !Number.isFinite(price) ||
+        !Number.isFinite(discount) ||
+        price <= 0 ||
+        discount < 0 ||
+        discount > 100
+    ) {
+        result.textContent = "Введите корректную цену и скидку от 0 до 100%!";
+        return;
+    }
+
+    const saved = calculateDiscount(price, discount);
+    const total = calculateFinalPrice(price, discount);
+
+    result.innerHTML = `
+        Цена товара: ${price.toFixed(2)} ₸<br>
+        Сумма скидки: ${saved.toFixed(2)} ₸<br>
+        Итоговая стоимость: ${total.toFixed(2)} ₸
+    `;
+});
+
+document.querySelector("#clear").addEventListener("click", () => {
+    priceInput.value = "";
+    discountInput.value = "";
+    result.textContent = "";
+});
+
+
+
+
+script1.js
+
+
+export function calculateDiscount(price, discount) {
+    return price * discount / 100;
+}
+
+export function calculateFinalPrice(price, discount) {
+    return price - calculateDiscount(price, discount);
+}
