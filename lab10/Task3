@@ -1,0 +1,470 @@
+index.html
+
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бронирование аудиторий</title>
+
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="main.js"></script>
+</head>
+<body>
+
+    <main class="container">
+        <h1>Бронирование аудиторий</h1>
+
+        <section class="card">
+            <h2>Новое бронирование</h2>
+
+            <form id="bookingForm">
+                <label for="room">Аудитория</label>
+                <select id="room" required>
+                    <option value="">Выберите аудиторию</option>
+                    <option value="101">Аудитория 101</option>
+                    <option value="102">Аудитория 102</option>
+                    <option value="103">Аудитория 103</option>
+                    <option value="201">Аудитория 201</option>
+                    <option value="202">Аудитория 202</option>
+                </select>
+
+                <label for="date">Дата</label>
+                <input type="date" id="date" required>
+
+                <label for="start">Время начала</label>
+                <input type="time" id="start" required>
+
+                <label for="end">Время окончания</label>
+                <input type="time" id="end" required>
+
+                <button type="submit">Забронировать</button>
+            </form>
+
+            <p id="message"></p>
+        </section>
+
+        <section class="card">
+            <h2>Список бронирований</h2>
+            <div id="bookingList">
+                <p class="empty">Пока нет бронирований</p>
+            </div>
+        </section>
+    </main>
+
+</body>
+</html>
+
+
+
+styles.css
+
+
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 30px;
+    font-family: Arial, sans-serif;
+    background: #eef2f7;
+    color: #222;
+}
+
+.container {
+    max-width: 750px;
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    color: #243b64;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    margin-bottom: 25px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+}
+
+h2 {
+    margin-top: 0;
+    color: #304c78;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+label {
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+input, select {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #cbd3df;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+button {
+    padding: 12px;
+    margin-top: 15px;
+    border: none;
+    border-radius: 6px;
+    background: #356ac3;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #244f99;
+}
+
+.booking {
+    padding: 15px;
+    margin-top: 12px;
+    border: 1px solid #dce2eb;
+    border-radius: 8px;
+    background: #f8faff;
+}
+
+.booking p {
+    margin: 6px 0;
+}
+
+.delete {
+    background: #d9534f;
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.delete:hover {
+    background: #b52b27;
+}
+
+#message {
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.empty {
+    color: #777;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 15px;
+    }
+
+    .card {
+        padding: 18px;
+    }
+}
+
+
+
+
+script.js
+
+
+const form = document.getElementById("bookingForm");
+const room = document.getElementById("room");
+const date = document.getElementById("date");
+const start = document.getElementById("start");
+const end = document.getElementById("end");
+const message = document.getElementById("message");
+const bookingList = document.getElementById("bookingList");
+
+let bookings = [];
+
+function checkData() {
+    if (!room.value || !date.value || !start.value || !end.value) {
+        return "Заполните все поля!";
+    }
+
+    if (start.value >= end.value) {
+        return "Время окончания должно быть позже начала!";
+    }
+
+    return "";
+}
+
+function addBooking(newBooking) {
+    for (let booking of bookings) {
+        if (
+            booking.room === newBooking.room &&
+            booking.date === newBooking.date &&
+            newBooking.start < booking.end &&
+            newBooking.end > booking.start
+        ) {
+            return false;
+        }
+    }
+
+    bookings.push(newBooking);
+    return true;
+}
+
+function showBookings() {
+    bookingList.innerHTML = "";
+
+    if (bookings.length === 0) {
+        bookingList.innerHTML =
+            '<p class="empty">Пока нет бронирований</p>';
+        return;
+    }
+
+    bookings.forEach((booking, index) => {
+        const item = document.createElement("div");
+        item.className = "booking";
+
+        item.innerHTML = `
+            <p><strong>Аудитория:</strong> ${booking.room}</p>
+            <p><strong>Дата:</strong> ${booking.date}</p>
+            <p><strong>Время:</strong> ${booking.start} - ${booking.end}</p>
+            <button class="delete" data-index="${index}">
+                Удалить
+            </button>
+        `;
+
+        bookingList.appendChild(item);
+    });
+}
+
+form.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const error = checkData();
+
+    if (error) {
+        message.style.color = "red";
+        message.textContent = error;
+        return;
+    }
+
+    const newBooking = {
+        room: room.value,
+        date: date.value,
+        start: start.value,
+        end: end.value
+    };
+
+    if (!addBooking(newBooking)) {
+        message.style.color = "red";
+        message.textContent =
+            "Эта аудитория уже забронирована на указанное время!";
+        return;
+    }
+
+    message.style.color = "green";
+    message.textContent = "Бронирование успешно добавлено!";
+
+    form.reset();
+    showBookings();
+});
+
+bookingList.addEventListener("click", function(event) {
+    if (event.target.classList.contains("delete")) {
+        const index = Number(event.target.dataset.index);
+
+        bookings.splice(index, 1);
+
+        showBookings();
+
+        message.style.color = "green";
+        message.textContent = "Бронирование удалено!";
+    }
+});
+
+showBookings();
+
+
+
+rooms.js
+
+
+export const rooms = [
+    "101",
+    "102",
+    "103",
+    "201",
+    "202"
+];
+
+
+
+booking.js
+
+
+
+let bookings = [];
+
+export function addBooking(newBooking) {
+    for (let booking of bookings) {
+        if (
+            booking.room === newBooking.room &&
+            booking.date === newBooking.date &&
+            newBooking.start < booking.end &&
+            newBooking.end > booking.start
+        ) {
+            return false;
+        }
+    }
+
+    bookings.push(newBooking);
+    return true;
+}
+
+export function getBookings() {
+    return bookings;
+}
+
+export function removeBooking(index) {
+    bookings.splice(index, 1);
+}
+
+
+
+
+ui.js
+
+
+
+export function showBookings(bookings, bookingList) {
+    bookingList.innerHTML = "";
+
+    if (bookings.length === 0) {
+        bookingList.innerHTML =
+            '<p class="empty">Пока нет бронирований</p>';
+        return;
+    }
+
+    bookings.forEach((booking, index) => {
+        const item = document.createElement("div");
+        item.className = "booking";
+
+        item.innerHTML = `
+            <p><strong>Аудитория:</strong> ${booking.room}</p>
+            <p><strong>Дата:</strong> ${booking.date}</p>
+            <p><strong>Время:</strong> ${booking.start} - ${booking.end}</p>
+            <button class="delete" data-index="${index}">
+                Удалить
+            </button>
+        `;
+
+        bookingList.appendChild(item);
+    });
+}
+
+
+
+main.js
+
+
+import { rooms } from "./rooms.js";
+import { checkData } from "./validation.js";
+import {
+    addBooking,
+    getBookings,
+    removeBooking
+} from "./booking.js";
+import { showBookings } from "./ui.js";
+
+const form = document.getElementById("bookingForm");
+const room = document.getElementById("room");
+const date = document.getElementById("date");
+const start = document.getElementById("start");
+const end = document.getElementById("end");
+const message = document.getElementById("message");
+const bookingList = document.getElementById("bookingList");
+
+room.innerHTML = '<option value="">Выберите аудиторию</option>';
+
+rooms.forEach(number => {
+    const option = document.createElement("option");
+    option.value = number;
+    option.textContent = "Аудитория " + number;
+    room.appendChild(option);
+});
+
+form.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const error = checkData(
+        room.value,
+        date.value,
+        start.value,
+        end.value
+    );
+
+    if (error) {
+        message.style.color = "red";
+        message.textContent = error;
+        return;
+    }
+
+    const newBooking = {
+        room: room.value,
+        date: date.value,
+        start: start.value,
+        end: end.value
+    };
+
+    if (!addBooking(newBooking)) {
+        message.style.color = "red";
+        message.textContent =
+            "Эта аудитория уже занята на указанное время!";
+        return;
+    }
+
+    message.style.color = "green";
+    message.textContent = "Бронирование успешно добавлено!";
+
+    form.reset();
+    showBookings(getBookings(), bookingList);
+});
+
+bookingList.addEventListener("click", function(event) {
+    if (event.target.classList.contains("delete")) {
+        const index = Number(event.target.dataset.index);
+
+        removeBooking(index);
+        showBookings(getBookings(), bookingList);
+
+        message.style.color = "green";
+        message.textContent = "Бронирование удалено!";
+    }
+});
+
+showBookings(getBookings(), bookingList);
+
+
+
+validation.js
+
+
+
+export function checkData(room, date, start, end) {
+    if (!room || !date || !start || !end) {
+        return "Заполните все поля!";
+    }
+
+    if (start >= end) {
+        return "Время окончания должно быть позже времени начала!";
+    }
+
+    return "";
+}
