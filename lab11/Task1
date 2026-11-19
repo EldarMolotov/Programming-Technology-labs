@@ -1,0 +1,170 @@
+index.html
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карточка студента</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Карточка студента</h1>
+
+        <div id="student"></div>
+
+        <button id="themeButton">Тёмная тема</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+
+styles.css
+
+
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #edf1f7;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 25px;
+    background: white;
+    border-radius: 12px;
+    text-align: center;
+}
+
+h1 {
+    color: #234b78;
+}
+
+.card {
+    background: #edf3fa;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 10px;
+    text-align: left;
+}
+
+button {
+    background: #234b78;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 7px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+button:hover {
+    background: #163454;
+}
+
+.details {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.footer {
+    color: gray;
+    margin-top: 25px;
+}
+
+.dark {
+    background: #263445;
+    color: white;
+}
+
+.dark .container {
+    background: #35465a;
+}
+
+.dark h1 {
+    color: white;
+}
+
+.dark .card {
+    background: #465970;
+}
+
+.dark .details {
+    background: #35465a;
+}
+
+
+
+script.js
+
+
+
+function StudentCard(props) {
+    return `
+        <div class="card">
+            <h2>${props.name}</h2>
+            <p>Группа: ${props.group}</p>
+            <p>Специальность: ${props.specialty}</p>
+
+            <button id="detailsButton">
+                Показать подробности
+            </button>
+
+            <div id="details" class="details" hidden>
+                <h3>Информация о студенте</h3>
+                <p>Имя: ${props.name}</p>
+                <p>Группа: ${props.group}</p>
+                <p>Специальность: ${props.specialty}</p>
+                <p>Статус: Обучается</p>
+            </div>
+        </div>
+    `;
+}
+
+// Родительский компонент и его состояние
+const student = {
+    name: "Иван Иванов",
+    group: "ИТ-22",
+    specialty: "Информационные технологии"
+};
+
+let darkTheme = false;
+
+document.getElementById("student").innerHTML =
+    StudentCard(student);
+
+const detailsButton = document.getElementById("detailsButton");
+const details = document.getElementById("details");
+
+detailsButton.addEventListener("click", function() {
+    details.hidden = !details.hidden;
+
+    detailsButton.textContent = details.hidden
+        ? "Показать подробности"
+        : "Скрыть подробности";
+});
+
+document.getElementById("themeButton").addEventListener("click", function() {
+    darkTheme = !darkTheme;
+
+    document.body.classList.toggle("dark", darkTheme);
+
+    this.textContent = darkTheme
+        ? "Светлая тема"
+        : "Тёмная тема";
+});
