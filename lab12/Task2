@@ -1,0 +1,301 @@
+index.html
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление сессией</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Личный кабинет</h1>
+            <p>Управление пользовательской сессией</p>
+        </header>
+
+        <section class="panel" id="loginPanel">
+            <h2>Авторизация</h2>
+
+            <form id="loginForm">
+                <label for="username">Логин</label>
+                <input type="text" id="username"
+                       placeholder="Введите логин">
+
+                <label for="password">Пароль</label>
+                <input type="password" id="password"
+                       placeholder="Введите пароль">
+
+                <button type="submit">Войти</button>
+            </form>
+
+            <p id="message"></p>
+
+            <div class="demo">
+                <p>Логин: student1</p>
+                <p>Пароль: pass123</p>
+            </div>
+        </section>
+
+        <section class="panel hidden" id="accountPanel">
+            <h2>Добро пожаловать!</h2>
+
+            <p id="welcome"></p>
+
+            <div class="timer">
+                <p>Осталось времени сессии:</p>
+                <h1 id="timer">120 секунд</h1>
+            </div>
+
+            <button id="logoutButton" class="logout">
+                Выйти
+            </button>
+        </section>
+
+        <footer>
+            <p>Лабораторная работа №12</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+
+
+styles.css
+
+
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #eef2f7;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 650px;
+    margin: auto;
+}
+
+header {
+    background: #234b78;
+    color: white;
+    text-align: center;
+    padding: 25px;
+    border-radius: 10px;
+}
+
+.panel {
+    background: white;
+    padding: 25px;
+    margin-top: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #ccc;
+}
+
+h2 {
+    color: #234b78;
+}
+
+label {
+    display: block;
+    margin: 12px 0 6px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+}
+
+button {
+    background: #234b78;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    margin-top: 15px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #163454;
+}
+
+.logout {
+    background: #c0392b;
+}
+
+.hidden {
+    display: none;
+}
+
+.timer {
+    background: #edf3fa;
+    padding: 20px;
+    text-align: center;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+
+.timer h1 {
+    color: #234b78;
+}
+
+.demo {
+    background: #edf3fa;
+    padding: 12px;
+    margin-top: 15px;
+}
+
+.success {
+    color: green;
+}
+
+.error {
+    color: red;
+}
+
+footer {
+    text-align: center;
+    color: #666;
+    margin-top: 20px;
+}
+
+
+
+script.js
+
+
+
+
+// Данные пользователя
+const user = {
+    username: "student1",
+    password: "pass123",
+    name: "Иван Иванов"
+};
+
+// Продолжительность сессии
+const SESSION_DURATION = 120;
+
+// Получение элементов
+const loginForm = document.getElementById("loginForm");
+const loginPanel = document.getElementById("loginPanel");
+const accountPanel = document.getElementById("accountPanel");
+
+const usernameInput = document.getElementById("username");
+const passwordInput = document.getElementById("password");
+
+const message = document.getElementById("message");
+const welcome = document.getElementById("welcome");
+const timer = document.getElementById("timer");
+
+const logoutButton = document.getElementById("logoutButton");
+
+// Состояние сессии
+let isLoggedIn = false;
+let sessionEnd = null;
+let timerInterval = null;
+
+// Вход
+loginForm.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value;
+
+    if (username === "" || password === "") {
+        message.textContent = "Заполните все поля!";
+        message.className = "error";
+        return;
+    }
+
+    if (
+        username === user.username &&
+        password === user.password
+    ) {
+        isLoggedIn = true;
+
+        sessionEnd = Date.now() + SESSION_DURATION * 1000;
+
+        loginPanel.classList.add("hidden");
+        accountPanel.classList.remove("hidden");
+
+        welcome.textContent =
+            "Здравствуйте, " + user.name + "!";
+
+        passwordInput.value = "";
+
+        startTimer();
+    } else {
+        message.textContent = "Неверный логин или пароль!";
+        message.className = "error";
+    }
+});
+
+// Запуск таймера
+function startTimer() {
+    clearInterval(timerInterval);
+
+    updateTimer();
+
+    timerInterval = setInterval(function() {
+        updateTimer();
+    }, 1000);
+}
+
+// Обновление таймера
+function updateTimer() {
+    if (!isLoggedIn) {
+        return;
+    }
+
+    const remaining = Math.max(
+        0,
+        Math.ceil((sessionEnd - Date.now()) / 1000)
+    );
+
+    timer.textContent = remaining + " секунд";
+
+    if (remaining <= 0) {
+        logout("Время сессии истекло. Войдите снова.");
+    }
+}
+
+// Выход
+function logout(reason) {
+    clearInterval(timerInterval);
+
+    isLoggedIn = false;
+    sessionEnd = null;
+
+    accountPanel.classList.add("hidden");
+    loginPanel.classList.remove("hidden");
+
+    usernameInput.value = "";
+    passwordInput.value = "";
+
+    timer.textContent = "120 секунд";
+
+    message.textContent =
+        reason || "Вы успешно вышли из системы.";
+
+    message.className = reason ? "error" : "success";
+}
+
+// Кнопка выхода
+logoutButton.addEventListener("click", function() {
+    logout();
+});
