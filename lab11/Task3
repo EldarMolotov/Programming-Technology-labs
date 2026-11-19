@@ -1,0 +1,258 @@
+index.html
+
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Электронный журнал</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Электронный журнал</h1>
+
+        <input
+            type="text"
+            id="search"
+            placeholder="Поиск студента"
+        >
+
+        <div id="students"></div>
+
+        <div class="summary">
+            <h2>Общая статистика</h2>
+            <p id="studentCount"></p>
+            <p id="gradeCount"></p>
+            <p id="average"></p>
+        </div>
+
+        <p class="footer">Лабораторная работа №11</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+
+styles.css
+
+
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #edf1f7;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 30px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+}
+
+h1 {
+    text-align: center;
+    color: #234b78;
+}
+
+h2 {
+    color: #234b78;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 15px 0;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+}
+
+.student {
+    background: #edf3fa;
+    padding: 18px;
+    margin: 12px 0;
+    border-radius: 8px;
+}
+
+button {
+    background: #234b78;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #163454;
+}
+
+.average {
+    font-weight: bold;
+    color: #234b78;
+}
+
+.summary {
+    background: #edf3fa;
+    padding: 18px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.footer {
+    text-align: center;
+    color: gray;
+    margin-top: 25px;
+}
+
+
+
+script.js
+
+
+
+let students = [
+    {
+        id: 1,
+        name: "Иван Иванов",
+        group: "ИТ-22",
+        grades: [5, 4, 5]
+    },
+    {
+        id: 2,
+        name: "Петр Петров",
+        group: "ИТ-22",
+        grades: [3, 4, 4]
+    },
+    {
+        id: 3,
+        name: "Анна Смирнова",
+        group: "ИТ-23",
+        grades: [5, 5, 4]
+    }
+];
+
+// Дочерний компонент (props)
+function StudentRow(props) {
+    const average = props.grades.length > 0
+        ? (
+            props.grades.reduce(function(sum, grade) {
+                return sum + grade;
+            }, 0) / props.grades.length
+        ).toFixed(2)
+        : "Нет оценок";
+
+    return `
+        <div class="student">
+            <h3>${props.name}</h3>
+            <p>Группа: ${props.group}</p>
+            <p>Оценки: ${props.grades.join(", ")}</p>
+            <p class="average">Средний балл: ${average}</p>
+
+            <input
+                type="number"
+                id="grade-${props.id}"
+                min="1"
+                max="5"
+                step="1"
+                placeholder="Введите оценку"
+            >
+
+            <button onclick="addGrade(${props.id})">
+                Добавить оценку
+            </button>
+        </div>
+    `;
+}
+
+// Отображение студентов
+function showStudents() {
+    const search = document.getElementById("search")
+        .value.toLowerCase();
+
+    const filtered = students.filter(function(student) {
+        return student.name.toLowerCase().includes(search);
+    });
+
+    const container = document.getElementById("students");
+
+    if (filtered.length === 0) {
+        container.innerHTML = "<p>Студенты не найдены.</p>";
+    } else {
+        container.innerHTML = filtered.map(function(student) {
+            return StudentRow(student);
+        }).join("");
+    }
+
+    updateStatistics();
+}
+
+// Добавление оценки
+function addGrade(id) {
+    const input = document.getElementById("grade-" + id);
+
+    if (!input || input.value.trim() === "") {
+        alert("Введите оценку!");
+        return;
+    }
+
+    const grade = Number(input.value);
+
+    if (!Number.isInteger(grade) || grade < 1 || grade > 5) {
+        alert("Оценка должна быть целым числом от 1 до 5!");
+        return;
+    }
+
+    const student = students.find(function(item) {
+        return item.id === id;
+    });
+
+    if (student) {
+        student.grades.push(grade);
+        showStudents();
+    }
+}
+
+// Общая статистика
+function updateStatistics() {
+    const allGrades = students.reduce(function(result, student) {
+        return result.concat(student.grades);
+    }, []);
+
+    const average = allGrades.length > 0
+        ? (
+            allGrades.reduce(function(sum, grade) {
+                return sum + grade;
+            }, 0) / allGrades.length
+        ).toFixed(2)
+        : "Нет оценок";
+
+    document.getElementById("studentCount").textContent =
+        "Количество студентов: " + students.length;
+
+    document.getElementById("gradeCount").textContent =
+        "Количество оценок: " + allGrades.length;
+
+    document.getElementById("average").textContent =
+        "Средний балл группы: " + average;
+}
+
+// Поиск
+document.getElementById("search").addEventListener("input", function() {
+    showStudents();
+});
+
+// Запуск приложения
+showStudents();
