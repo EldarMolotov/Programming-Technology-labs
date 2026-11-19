@@ -1,0 +1,214 @@
+index.html
+
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина товаров</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Магазин товаров</h1>
+
+        <h2>Каталог</h2>
+        <div id="products"></div>
+
+        <h2>Моя корзина</h2>
+        <div class="cart">
+            <div id="cartItems">Корзина пуста</div>
+            <h3 id="total">Общая сумма: 0 тенге</h3>
+            <button id="clearButton">Очистить корзину</button>
+        </div>
+
+        <p class="footer">Лабораторная работа №11</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+
+styles.css
+
+
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #edf1f7;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 750px;
+    margin: 30px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+}
+
+h1 {
+    text-align: center;
+    color: #234b78;
+}
+
+h2 {
+    color: #234b78;
+    margin-top: 25px;
+}
+
+.product {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    background: #edf3fa;
+    margin: 10px 0;
+    border-radius: 8px;
+}
+
+button {
+    background: #234b78;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #163454;
+}
+
+.remove {
+    background: #c0392b;
+}
+
+.cart {
+    background: #edf3fa;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.cartItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #ccc;
+}
+
+.footer {
+    text-align: center;
+    color: gray;
+    margin-top: 25px;
+}
+
+
+
+script.js
+
+
+
+const products = [
+    { id: 1, name: "Ноутбук", price: 250000 },
+    { id: 2, name: "Мышка", price: 5000 },
+    { id: 3, name: "Клавиатура", price: 12000 },
+    { id: 4, name: "Наушники", price: 15000 }
+];
+
+// Состояние корзины
+let cart = [];
+
+// Дочерний компонент товара (props)
+function ProductCard(props) {
+    return `
+        <div class="product">
+            <div>
+                <h3>${props.name}</h3>
+                <p>Цена: ${props.price} тенге</p>
+            </div>
+
+            <button onclick="addToCart(${props.id})">
+                Добавить
+            </button>
+        </div>
+    `;
+}
+
+// Отображение каталога
+function showProducts() {
+    document.getElementById("products").innerHTML =
+        products.map(function(product) {
+            return ProductCard(product);
+        }).join("");
+}
+
+// Добавление товара
+function addToCart(id) {
+    const product = products.find(function(item) {
+        return item.id === id;
+    });
+
+    if (product) {
+        cart.push(product);
+        showCart();
+    }
+}
+
+// Удаление товара
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    showCart();
+}
+
+// Отображение корзины
+function showCart() {
+    const cartItems = document.getElementById("cartItems");
+
+    if (cart.length === 0) {
+        cartItems.textContent = "Корзина пуста";
+    } else {
+        cartItems.innerHTML = cart.map(function(item, index) {
+            return `
+                <div class="cartItem">
+                    <span>${item.name} — ${item.price} тенге</span>
+                    <button class="remove"
+                        onclick="removeFromCart(${index})">
+                        Удалить
+                    </button>
+                </div>
+            `;
+        }).join("");
+    }
+
+    const total = cart.reduce(function(sum, item) {
+        return sum + item.price;
+    }, 0);
+
+    document.getElementById("total").textContent =
+        "Количество товаров: " + cart.length +
+        " | Общая сумма: " + total + " тенге";
+}
+
+// Очистка корзины
+document.getElementById("clearButton").addEventListener("click", function() {
+    cart = [];
+    showCart();
+});
+
+// Запуск
+showProducts();
+showCart();
