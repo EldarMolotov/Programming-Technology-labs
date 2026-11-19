@@ -1,0 +1,542 @@
+index.html
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет студента</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+
+        <header>
+            <h1>Личный кабинет студента</h1>
+            <p>Система аутентификации и управления сессиями</p>
+        </header>
+
+        <main>
+
+            <!-- Форма входа -->
+            <section class="panel" id="loginPanel">
+                <h2>Вход в систему</h2>
+
+                <form id="loginForm">
+                    <label for="username">Логин</label>
+                    <input
+                        type="text"
+                        id="username"
+                        placeholder="Введите логин"
+                        autocomplete="username"
+                    >
+
+                    <label for="password">Пароль</label>
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Введите пароль"
+                        autocomplete="current-password"
+                    >
+
+                    <button type="submit">Войти</button>
+                </form>
+
+                <p id="message" aria-live="polite"></p>
+
+                <div class="demo">
+                    <h3>Тестовые аккаунты</h3>
+                    <p>student1 / pass123</p>
+                    <p>student2 / pass456</p>
+                </div>
+            </section>
+
+            <!-- Личный кабинет -->
+            <section class="panel hidden" id="accountPanel">
+                <h2>Личный кабинет</h2>
+
+                <p id="welcome"></p>
+                <p id="role"></p>
+
+                <div class="timer">
+                    <p>Оставшееся время сессии:</p>
+                    <h2 id="sessionTime">120 секунд</h2>
+                </div>
+
+                <button type="button" id="logoutButton" class="logout">
+                    Выйти из системы
+                </button>
+            </section>
+
+            <!-- Бронирования -->
+            <section class="panel hidden" id="bookingPanel">
+                <h2>Мои бронирования</h2>
+
+                <div id="bookingList"></div>
+
+                <h3>Проверка доступа к бронированию</h3>
+
+                <label for="bookingId">ID бронирования</label>
+                <input
+                    type="number"
+                    id="bookingId"
+                    placeholder="Например, 101"
+                >
+
+                <button type="button" id="checkBookingButton">
+                    Проверить доступ
+                </button>
+
+                <p id="bookingMessage" aria-live="polite"></p>
+            </section>
+
+            <!-- Информация -->
+            <section class="panel">
+                <h2>Информация о системе</h2>
+
+                <p>Назначение: авторизация пользователей.</p>
+                <p>Управление: пользовательские сессии.</p>
+                <p>Дополнительно: проверка доступа к бронированиям.</p>
+                <p>Технологии: HTML, CSS, JavaScript.</p>
+            </section>
+
+        </main>
+
+        <footer>
+            <p>Лабораторная работа №12</p>
+            <p>Языки и технология программирования</p>
+        </footer>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+
+styles.css
+
+
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background: #eef2f7;
+    color: #222;
+}
+
+.container {
+    max-width: 750px;
+    margin: 0 auto;
+}
+
+header {
+    background: #234b78;
+    color: white;
+    text-align: center;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    margin-top: 0;
+}
+
+.panel {
+    background: white;
+    padding: 22px;
+    margin-bottom: 18px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+h2 {
+    color: #234b78;
+    margin-top: 0;
+}
+
+label {
+    display: block;
+    margin-top: 12px;
+    margin-bottom: 6px;
+}
+
+input {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+button {
+    background: #234b78;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 8px;
+    font-size: 15px;
+}
+
+button:hover {
+    background: #163454;
+}
+
+.logout {
+    background: #c0392b;
+}
+
+.logout:hover {
+    background: #922b21;
+}
+
+.hidden {
+    display: none;
+}
+
+.success {
+    color: #218838;
+    font-weight: bold;
+}
+
+.error {
+    color: #c0392b;
+    font-weight: bold;
+}
+
+.demo {
+    background: #edf3fa;
+    padding: 12px;
+    margin-top: 18px;
+    border-radius: 6px;
+}
+
+.timer {
+    background: #edf3fa;
+    padding: 15px;
+    margin: 18px 0;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.timer h2 {
+    margin-bottom: 0;
+}
+
+.booking {
+    background: #edf3fa;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 6px;
+}
+
+footer {
+    text-align: center;
+    color: #666;
+    padding: 15px;
+}
+
+@media (max-width: 500px) {
+    body {
+        padding: 10px;
+    }
+
+    header {
+        padding: 15px;
+    }
+
+    .panel {
+        padding: 15px;
+    }
+}
+
+
+
+
+script.js
+
+
+// Тестовые пользователи
+const users = [
+    {
+        username: "student1",
+        password: "pass123",
+        name: "Иван Иванов",
+        role: "Студент"
+    },
+    {
+        username: "student2",
+        password: "pass456",
+        name: "Петр Петров",
+        role: "Студент"
+    }
+];
+
+// Учебная база бронирований
+const bookings = [
+    {
+        id: 101,
+        username: "student1",
+        resource: "Аудитория №101"
+    },
+    {
+        id: 102,
+        username: "student1",
+        resource: "Компьютер №5"
+    },
+    {
+        id: 201,
+        username: "student2",
+        resource: "Аудитория №202"
+    }
+];
+
+// Получение элементов страницы
+const loginPanel = document.getElementById("loginPanel");
+const accountPanel = document.getElementById("accountPanel");
+const bookingPanel = document.getElementById("bookingPanel");
+
+const loginForm = document.getElementById("loginForm");
+const usernameInput = document.getElementById("username");
+const passwordInput = document.getElementById("password");
+
+const message = document.getElementById("message");
+const welcome = document.getElementById("welcome");
+const role = document.getElementById("role");
+const sessionTime = document.getElementById("sessionTime");
+
+const logoutButton = document.getElementById("logoutButton");
+
+const bookingList = document.getElementById("bookingList");
+const bookingId = document.getElementById("bookingId");
+const bookingMessage = document.getElementById("bookingMessage");
+const checkBookingButton =
+    document.getElementById("checkBookingButton");
+
+// Состояние пользователя
+let currentUser = null;
+
+// Продолжительность сессии: 120 секунд
+const SESSION_DURATION = 120000;
+
+// Время окончания сессии
+let sessionEnd = null;
+
+// Таймер
+let sessionTimer = null;
+
+// Показ сообщения
+function showMessage(text, type) {
+    message.textContent = text;
+    message.className = type;
+}
+
+// Проверка авторизации
+function isAuthenticated() {
+    return currentUser !== null &&
+           sessionEnd !== null &&
+           Date.now() < sessionEnd;
+}
+
+// Вход в систему
+loginForm.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value;
+
+    // Проверка пустых полей
+    if (username === "" || password === "") {
+        showMessage("Заполните все поля!", "error");
+        return;
+    }
+
+    // Проверка учетных данных
+    const user = users.find(function(item) {
+        return item.username === username &&
+               item.password === password;
+    });
+
+    if (!user) {
+        showMessage("Неверный логин или пароль!", "error");
+        return;
+    }
+
+    // Создание учебной сессии
+    currentUser = user;
+    sessionEnd = Date.now() + SESSION_DURATION;
+
+    // Открытие личного кабинета
+    loginPanel.classList.add("hidden");
+    accountPanel.classList.remove("hidden");
+    bookingPanel.classList.remove("hidden");
+
+    welcome.textContent =
+        "Добро пожаловать, " + user.name + "!";
+
+    role.textContent =
+        "Ваша роль: " + user.role;
+
+    passwordInput.value = "";
+
+    showMessage("Вход выполнен успешно!", "success");
+
+    // Запуск таймера
+    startSessionTimer();
+
+    // Показ бронирований
+    showBookings();
+});
+
+// Запуск таймера сессии
+function startSessionTimer() {
+    clearInterval(sessionTimer);
+
+    updateSessionTime();
+
+    sessionTimer = setInterval(function() {
+        updateSessionTime();
+    }, 1000);
+}
+
+// Обновление оставшегося времени
+function updateSessionTime() {
+    if (!currentUser || sessionEnd === null) {
+        return;
+    }
+
+    const remaining = Math.max(
+        0,
+        Math.ceil((sessionEnd - Date.now()) / 1000)
+    );
+
+    sessionTime.textContent = remaining + " секунд";
+
+    if (remaining <= 0) {
+        logout("Время сессии истекло. Войдите снова.");
+    }
+}
+
+// Выход из системы
+function logout(reason) {
+    clearInterval(sessionTimer);
+
+    currentUser = null;
+    sessionEnd = null;
+
+    loginPanel.classList.remove("hidden");
+    accountPanel.classList.add("hidden");
+    bookingPanel.classList.add("hidden");
+
+    welcome.textContent = "";
+    role.textContent = "";
+    sessionTime.textContent = "";
+
+    bookingList.innerHTML = "";
+    bookingId.value = "";
+    bookingMessage.textContent = "";
+
+    usernameInput.value = "";
+    passwordInput.value = "";
+
+    if (reason) {
+        showMessage(reason, "error");
+    } else {
+        showMessage("Вы вышли из системы.", "success");
+    }
+}
+
+// Кнопка выхода
+logoutButton.addEventListener("click", function() {
+    logout();
+});
+
+// Отображение бронирований пользователя
+function showBookings() {
+    bookingList.innerHTML = "";
+
+    if (!isAuthenticated()) {
+        bookingMessage.textContent =
+            "Ошибка 401: необходимо войти в систему.";
+        return;
+    }
+
+    const userBookings = bookings.filter(function(booking) {
+        return booking.username === currentUser.username;
+    });
+
+    if (userBookings.length === 0) {
+        bookingList.textContent = "Бронирований нет.";
+        return;
+    }
+
+    userBookings.forEach(function(booking) {
+        const item = document.createElement("div");
+
+        item.className = "booking";
+
+        item.textContent =
+            "ID: " + booking.id +
+            " | " + booking.resource;
+
+        bookingList.appendChild(item);
+    });
+}
+
+// Проверка доступа к бронированию
+checkBookingButton.addEventListener("click", function() {
+
+    // Проверка авторизации
+    if (!isAuthenticated()) {
+        bookingMessage.textContent =
+            "Ошибка 401: необходимо войти в систему.";
+        return;
+    }
+
+    const id = Number(bookingId.value);
+
+    // Проверка введенного ID
+    if (
+        bookingId.value.trim() === "" ||
+        !Number.isInteger(id) ||
+        id <= 0
+    ) {
+        bookingMessage.textContent =
+            "Введите корректный ID бронирования.";
+        return;
+    }
+
+    // Поиск бронирования
+    const booking = bookings.find(function(item) {
+        return item.id === id;
+    });
+
+    if (!booking) {
+        bookingMessage.textContent =
+            "Бронирование не найдено.";
+        return;
+    }
+
+    // Проверка владельца ресурса
+    if (booking.username !== currentUser.username) {
+        bookingMessage.textContent =
+            "Ошибка 403: доступ к чужому бронированию запрещен.";
+        return;
+    }
+
+    // Разрешение доступа
+    bookingMessage.textContent =
+        "Доступ разрешен! Ваш ресурс: " + booking.resource;
+});
