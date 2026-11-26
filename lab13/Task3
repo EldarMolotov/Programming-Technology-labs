@@ -1,0 +1,144 @@
+Выбор структуры данных
+Используем две структуры данных:
+
+dict — словарь для хранения мест и их владельцев.
+
+deque — очередь ожидания.
+
+Например:
+seats = {1: "Алия", 2: None} — первое место занято Алией, второе свободно.
+
+waiting = deque() — очередь людей, ожидающих свободное место.
+
+Словарь позволяет быстро обращаться к конкретному месту по его номеру.
+
+Очередь deque позволяет автоматически передавать место первому ожидающему человеку
+
+Исходный код: 
+
+from collections import deque
+
+# Создаем 3 места
+seats = {
+    1: None,
+    2: None,
+    3: None
+}
+
+# Очередь ожидания
+waiting = deque()
+
+while True:
+    print("\n===== СИСТЕМА БРОНИРОВАНИЯ =====")
+    print("1. Забронировать место")
+    print("2. Отменить бронирование")
+    print("3. Показать места")
+    print("4. Показать очередь ожидания")
+    print("5. Показать статистику")
+    print("6. Выход")
+
+    choice = input("Выберите действие: ")
+
+    if choice == "1":
+        name = input("Введите имя: ")
+
+        # Проверяем повторную регистрацию
+        if name in seats.values() or name in waiting:
+            print("Этот человек уже зарегистрирован!")
+            continue
+
+        free_seat = None
+
+        # Ищем свободное место
+        for number in seats:
+            if seats[number] is None:
+                free_seat = number
+                break
+
+        if free_seat is not None:
+            seats[free_seat] = name
+            print("Место", free_seat, "забронировано для", name)
+        else:
+            waiting.append(name)
+            print("Свободных мест нет.")
+            print(name, "добавлен в очередь ожидания.")
+
+    elif choice == "2":
+        try:
+            number = int(input("Введите номер места: "))
+
+            if number not in seats:
+                print("Такого места не существует!")
+
+            elif seats[number] is None:
+                print("Это место уже свободно!")
+
+            else:
+                old_name = seats[number]
+                print("Бронирование отменено для", old_name)
+
+                # Передаем место первому ожидающему
+                if len(waiting) > 0:
+                    new_name = waiting.popleft()
+                    seats[number] = new_name
+                    print("Место передано:", new_name)
+                else:
+                    seats[number] = None
+                    print("Место теперь свободно.")
+
+        except ValueError:
+            print("Введите правильный номер места!")
+
+    elif choice == "3":
+        print("\nСостояние мест:")
+
+        for number, name in seats.items():
+            if name is None:
+                print("Место", number, "- свободно")
+            else:
+                print("Место", number, "-", name)
+
+    elif choice == "4":
+        if len(waiting) > 0:
+            print("Очередь ожидания:")
+            for person in waiting:
+                print(person)
+        else:
+            print("Очередь ожидания пуста.")
+
+    elif choice == "5":
+        occupied = 0
+
+        for name in seats.values():
+            if name is not None:
+                occupied += 1
+
+        free = len(seats) - occupied
+
+        print("Всего мест:", len(seats))
+        print("Занятых мест:", occupied)
+        print("Свободных мест:", free)
+        print("Людей в очереди:", len(waiting))
+
+    elif choice == "6":
+        print("Программа завершена.")
+        break
+
+    else:
+        print("Неверная команда!")
+
+Дополнительная функция:
+Добавлена статистика бронирования.
+Программа показывает:
+
+Общее количество мест.
+Количество занятых мест.
+Количество свободных мест.
+Количество людей в очереди ожидания.
+
+Статистика помогает контролировать состояние системы.
+
+Вывод:
+В ходе выполнения повышенного задания была разработана система бронирования мест. 
+Для хранения информации о местах использовался словарь dict, а для организации очереди ожидания — deque. 
+Реализованы бронирование, отмена, просмотр мест и автоматическая передача освободившегося места первому ожидающему. Также добавлена функция статистики.
